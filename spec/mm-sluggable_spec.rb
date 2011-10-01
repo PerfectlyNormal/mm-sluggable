@@ -35,6 +35,20 @@ describe "MongoMapper::Plugins::Sluggable" do
       @article.slug.length.should == 256
     end
   end
+  
+  describe "with sluggable method" do
+    before(:each) do
+      @klass.sluggable :author_and_title
+      @article = @klass.new(:title => "testing 123", :author => 'tester')
+      puts @article.to_json
+    end
+    
+    it "should set the slug" do
+      lambda{
+        @article.valid?
+      }.should change(@article, :slug).from(nil).to("tester-testing-123")
+    end
+  end
 
   describe "with scope" do
     before(:each) do
