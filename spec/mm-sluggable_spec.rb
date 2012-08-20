@@ -36,6 +36,19 @@ describe "MongoMapper::Plugins::Sluggable" do
     end
   end
 
+  describe "with sluggable method" do
+    before(:each) do
+      @klass.sluggable :author_and_title
+      @article = @klass.new(:title => "testing 123", :author => 'tester')
+    end
+
+    it "should set the slug" do
+      lambda {
+        @article.valid?
+      }.should change(@article, :slug).from(nil).to("tester-testing-123")
+    end
+  end
+
   describe "with scope" do
     before(:each) do
       @klass.sluggable :title, :scope => :account_id

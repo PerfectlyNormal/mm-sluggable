@@ -15,8 +15,13 @@ def article_class
 
     plugin MongoMapper::Plugins::Sluggable
 
+    key :author,      String
     key :title,       String
     key :account_id,  Integer
+    
+    def author_and_title
+      "#{author} #{title}"
+    end
   end
 
   klass.collection.remove
