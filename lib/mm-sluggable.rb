@@ -5,6 +5,31 @@ module MongoMapper
     module Sluggable
       extend ActiveSupport::Concern
 
+      included do
+        extend SluggedFinder
+      end
+
+      module SluggedFinder
+        # Just have to have something to alias,
+        # so create this. The original model takes care
+        # of the rest.
+        def find(*args)
+          super(*args)
+        end
+
+        alias_method :original_find, :find
+
+        def find(*args)
+          arg_f = args.first
+          if (args.size == 1) && (arg_f.to_s !~ /^[0-9a-f]{24}$/i)
+            options = slug_options
+            first options[:key] => arg_f
+          else
+            original_find *args
+          end
+        end
+      end
+
       module ClassMethods
         def sluggable(to_slug = :title, options = {})
           class_attribute :slug_options
@@ -55,6 +80,10 @@ module MongoMapper
         self.send(:"#{options[:key]}=", the_slug)
       end
 
+      def to_param
+        options = self.class.slug_options
+        ( self.send(options[:key]) || self.id ).to_s
+      end
     end
   end
 end

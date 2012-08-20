@@ -117,4 +117,32 @@ describe "MongoMapper::Plugins::Sluggable" do
       @article.slug.length.should == 5
     end
   end
+
+  describe "overrided function" do
+    before(:each) do
+      @klass.sluggable :title
+      @article = @klass.create(:title => "testing 123")
+    end
+
+    describe "#to_param" do
+      it "should return the slug" do
+        @article.to_param.should eq @article.slug
+      end
+
+      it "should return the id when slug is nil" do
+        @article.stub!(:slug).and_return(nil)
+        @article.to_param.should eq @article.id.to_s
+      end
+    end
+
+    describe "#find" do
+      it "should find by slug when call with slug" do
+        @klass.find(@article.slug).should eq @article
+      end
+
+      it "should keep original functionality" do
+        @klass.find(@article.id).should eq @article
+      end
+    end
+  end
 end
