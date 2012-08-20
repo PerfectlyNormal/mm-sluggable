@@ -118,6 +118,20 @@ describe "MongoMapper::Plugins::Sluggable" do
     end
   end
 
+  describe "with force" do
+    before(:each) do
+      @klass.sluggable :title, :force => true, :callback => :before_validation
+      @article = @klass.create(:title => "testing 123")
+    end
+
+    it "should set the slug on force is true and title is changed" do
+      lambda{
+         @article.title = "changed testing 123"
+         @article.valid?
+      }.should change(@article, :slug).from("testing-123").to("changed-testing-123")
+    end
+  end
+
   describe "overrided function" do
     before(:each) do
       @klass.sluggable :title
