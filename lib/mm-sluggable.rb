@@ -19,7 +19,10 @@ module MongoMapper
             :callback     => [:before_validation, {:on => :create}]
           }.merge(options)
 
-          key slug_options[:key], String, :index => slug_options[:index]
+          key slug_options[:key], String
+          if slug_options[:index]
+            self.ensure_index slug_options[:key]
+          end
 
           if slug_options[:callback].is_a?(Array)
             self.send(slug_options[:callback][0], :set_slug, slug_options[:callback][1])
@@ -28,7 +31,7 @@ module MongoMapper
           end
         end
       end
-      
+
       def set_slug
         options = self.class.slug_options
         return unless self.send(options[:key]).blank?
@@ -51,7 +54,7 @@ module MongoMapper
 
         self.send(:"#{options[:key]}=", the_slug)
       end
-      
+
     end
   end
 end
