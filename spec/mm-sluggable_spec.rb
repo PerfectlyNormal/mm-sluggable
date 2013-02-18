@@ -49,9 +49,30 @@ describe "MongoMapper::Plugins::Sluggable" do
     end
   end
 
-  describe "with scope" do
+  describe "with regular scope" do
     before(:each) do
       @klass.sluggable :title, :scope => :account_id
+      @article = @klass.new(:title => "testing 123", :account_id => 1)
+    end
+
+    it "should add a version number if the slug conflics in the scope" do
+      @klass.create(:title => "testing 123", :account_id => 1)
+      lambda{
+        @article.valid?
+      }.should change(@article, :slug).from(nil).to("testing-123-1")
+    end
+
+    it "should not add a version number if the slug conflicts in a different scope" do
+      @klass.create(:title => "testing 123", :account_id => 2)
+      lambda{
+        @article.valid?
+      }.should change(@article, :slug).from(nil).to("testing-123")
+    end
+  end
+
+  describe "with callable scope" do
+    before(:each) do
+      @klass.sluggable :title, :scope => ->(instance) { {:account_id => instance.account_id} }
       @article = @klass.new(:title => "testing 123", :account_id => 1)
     end
 

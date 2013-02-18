@@ -68,9 +68,14 @@ module MongoMapper
 
         the_slug = raw_slug = to_slug.send(options[:method]).to_s[0...options[:max_length]]
 
-        conds = {}
-        conds[options[:key]]   = the_slug
-        conds[options[:scope]] = self.send(options[:scope]) if options[:scope]
+        conds = { options[:key] => the_slug }
+        if options[:scope]
+          if options[:scope].respond_to?(:call)
+            conds.merge!(options[:scope].call(self))
+          else
+            conds.merge!(options[:scope] => self.send(options[:scope]))
+          end
+        end
 
         # todo - remove the loop and use regex instead so we can do it in one query
         i = 0
